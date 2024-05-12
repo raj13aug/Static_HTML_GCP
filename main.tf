@@ -6,9 +6,11 @@ resource "random_string" "random" {
 
 
 resource "google_storage_bucket" "static_site" {
-  name          = "cloudroot-demo-${random_string.random.result}"
-  location      = "US"
-  force_destroy = true
+  name                        = "cloudroot-demo-${random_string.random.result}"
+  location                    = "US"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+
   website {
     main_page_suffix = "index.html"
     not_found_page   = "404.html"
@@ -42,18 +44,15 @@ resource "google_storage_bucket_object" "static_site_src" {
   bucket = google_storage_bucket.static_site.name
 }
 
-resource "google_storage_bucket_acl" "website_bucket_acl" {
-  bucket      = google_storage_bucket.static_site.name
-  role_entity = ["READER:allUsers"]
-}
-
-
-resource "google_storage_default_object_access_control" "public_rule" {
+resource "google_storage_bucket_iam_member" "viewers" {
   bucket = google_storage_bucket.static_site.name
-  role   = "READER"
-  entity = "allUsers"
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+  depends_on = [
+    google_storage_bucket_object.static_site_src,
+    google_storage_bucket.static_site
+  ]
 }
-
 
 # Add the bucket as a CDN backend
 resource "google_compute_backend_bucket" "website" {
@@ -96,7 +95,7 @@ data "google_dns_managed_zone" "env_dns_zone" {
 
 resource "google_dns_record_set" "website" {
   provider     = google
-  name         = "html.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
+  name         = "web.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
   type         = "A"
   ttl          = 300
   managed_zone = data.google_dns_managed_zone.env_dns_zone.name
