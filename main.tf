@@ -11,7 +11,7 @@ resource "google_storage_bucket" "static_site" {
   force_destroy = true
   website {
     main_page_suffix = "index.html"
-    # not_found_page   = "404.html"
+    not_found_page   = "404.html"
   }
 
   labels = {
@@ -36,10 +36,16 @@ resource "google_storage_bucket" "static_site" {
 }
 
 
+
 resource "google_storage_bucket_object" "static_site_src" {
   name   = "index.html"
   source = "index.html"
   bucket = google_storage_bucket.static_site.name
+}
+
+resource "google_storage_bucket_acl" "website_bucket_acl" {
+  bucket      = google_storage_bucket.static_site.name
+  role_entity = ["READER:allUsers"]
 }
 
 
@@ -93,10 +99,6 @@ resource "google_compute_global_address" "website" {
   name     = "website-lb-ip"
 }
 
-# resource "google_dns_managed_zone" "my_dns_zone" {
-#   name     = "my-zone"
-#   dns_name = "cloudroot7.xyz."
-# }
 
 data "google_dns_managed_zone" "env_dns_zone" {
   name = "my-cloudrroot7-domain-zone"
