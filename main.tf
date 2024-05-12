@@ -93,17 +93,21 @@ resource "google_compute_global_address" "website" {
   name     = "website-lb-ip"
 }
 
-resource "google_dns_managed_zone" "my_dns_zone" {
-  name     = "my-zone"
-  dns_name = "cloudroot7.xyz."
+# resource "google_dns_managed_zone" "my_dns_zone" {
+#   name     = "my-zone"
+#   dns_name = "cloudroot7.xyz."
+# }
+
+data "google_dns_managed_zone" "env_dns_zone" {
+  name = "my-cloudrroot7-domain-zone"
 }
 
 resource "google_dns_record_set" "website" {
   provider     = google
-  name         = google_dns_managed_zone.my_dns_zone.dns_name
+  name         = "html.${data.google_dns_managed_zone.env_dns_zone.dns_name}"
   type         = "A"
   ttl          = 300
-  managed_zone = google_dns_managed_zone.my_dns_zone.name
+  managed_zone = data.google_dns_managed_zone.env_dns_zone.name
   rrdatas      = [google_compute_global_address.website.address]
 }
 
