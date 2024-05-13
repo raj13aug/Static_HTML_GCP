@@ -44,12 +44,19 @@ resource "google_storage_bucket_object" "static_site_src" {
   bucket = google_storage_bucket.static_site.name
 }
 
+resource "google_storage_bucket_object" "static_site_404" {
+  name   = "404.html"
+  source = "404.html"
+  bucket = google_storage_bucket.static_site.name
+}
+
 resource "google_storage_bucket_iam_member" "viewers" {
   bucket = google_storage_bucket.static_site.name
   role   = "roles/storage.objectViewer"
   member = "allUsers"
   depends_on = [
     google_storage_bucket_object.static_site_src,
+    google_storage_bucket_object.static_site_404,
     google_storage_bucket.static_site
   ]
 }
