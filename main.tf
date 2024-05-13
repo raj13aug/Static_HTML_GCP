@@ -61,7 +61,7 @@ resource "google_storage_bucket_iam_member" "viewers" {
   ]
 }
 
-# Add the bucket as a CDN backend
+
 resource "google_compute_backend_bucket" "website" {
   name        = "website-backend"
   description = "Contains files needed by the website"
