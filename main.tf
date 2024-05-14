@@ -69,13 +69,13 @@ resource "google_compute_backend_bucket" "website" {
   enable_cdn  = true
 }
 
-# GCP URL MAP
+
 resource "google_compute_url_map" "website" {
   name            = "website-url-map"
   default_service = google_compute_backend_bucket.website.self_link
 }
 
-#HTTP access 
+
 resource "google_compute_target_http_proxy" "website_http" {
   name    = "website-target-http-proxy"
   url_map = google_compute_url_map.website.self_link
@@ -85,7 +85,7 @@ resource "google_compute_global_address" "website" {
   name = "website-lb-ip"
 }
 
-# GCP forwarding rule for HTTP 
+
 resource "google_compute_global_forwarding_rule" "http" {
   name                  = "website-forwarding-rule-http"
   load_balancing_scheme = "EXTERNAL"
